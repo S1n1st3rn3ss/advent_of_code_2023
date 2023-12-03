@@ -29,7 +29,6 @@ fn calibration_value(input: String) -> i32 {
         if j.starts_with('8') || j.starts_with("eight") { temp_arr.push(8); }
         if j.starts_with('9') || j.starts_with("nine") { temp_arr.push(9); }
     }
-    let double_digit = temp_arr[0].to_string() + &temp_arr[temp_arr.len() - 1].to_string();
-    let double_digit: i32 = double_digit.parse().unwrap();
+    let double_digit = temp_arr[0] * 10 + &temp_arr[temp_arr.len() - 1];
     double_digit
 }
