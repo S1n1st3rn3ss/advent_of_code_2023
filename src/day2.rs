@@ -17,22 +17,23 @@ pub struct Game {
 pub fn parse_game(input: Vec<String>) -> Vec<Game> {
     // trim "Game n: " from each string
     let mut games: Vec<Game> = Default::default();
-    for i in input.clone().iter().enumerate()  {
+    for (id, res) in input.clone().iter().enumerate()  {
         let mut game: Game = Game {
-            id: (i.0 + 1) as i32,
+            id: (id + 1) as i32,
             group: vec![],
             min_group: Default::default(),
             possible: true,
         };
         // println!("{:?}", game);
-        let trimmed = i.1.trim_start_matches("Game ").trim_start_matches(|c:char| c.is_digit(10) || c == ':');
-        let trimmed = trimmed.trim();
-        // split games into rounds
-        let trem: Vec<Vec<&str>> = trimmed
+        let trimmed: Vec<Vec<&str>> = res
+            .trim_start_matches("Game ")
+            .trim_start_matches(|c:char| c.is_digit(10) || c == ':')
+            .trim()
             .split("; ")
-            .map(|c| c.split(", ").collect::<Vec<&str>>())
+            .map(|c| c.split(", ")
+            .collect::<Vec<&str>>())
             .collect();
-        for x in trem {
+        for x in trimmed {
             let mut gr = Group {
                 red: 0,
                 green: 0,
