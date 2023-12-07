@@ -17,5 +17,5 @@ fn main() {
     let i = File::open("input.txt")
         .expect("TODO: panic message")
         .read_to_string(&mut string);
-    println!("{}", day7::part1::run(&string));
+    println!("{}", day7::part2::run(&string));
 }
