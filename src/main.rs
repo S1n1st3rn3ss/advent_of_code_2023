@@ -6,6 +6,7 @@ mod day3;
 
 mod day4;
 mod day5;
+mod day7;
 
 use std::fs::File;
 use std::io::Read;
@@ -16,5 +17,5 @@ fn main() {
     let i = File::open("input.txt")
         .expect("TODO: panic message")
         .read_to_string(&mut string);
-    println!("{}", day5::part1::run(&string));
+    println!("{}", day7::part1::run(&string));
 }
