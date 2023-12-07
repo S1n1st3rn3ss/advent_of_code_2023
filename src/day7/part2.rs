@@ -43,7 +43,7 @@ pub fn run(input: &str) -> i64 {
         let rank = idx + 1;
         sum += (rank * player.bid as usize) as i64;
     }
-    sum - 248029057
+    sum
 }
 fn parse(input: &str) -> Vec<Player> {
     let card_hash: HashMap<char, u16> = HashMap::<char, u16>::from(CARD);
