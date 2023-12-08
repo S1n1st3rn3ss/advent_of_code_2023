@@ -1,14 +1,16 @@
-// pub fn run(input: &str) -> u32 {
-//     let input: Vec<&str> = input.lines().collect();
-//     for i in &input {
-//         let mut temp_arr: Vec<u32> = vec![];
-//         for c in 0..i.len() {
-//             let j: char = i.bytes()[c];
-//             if j.is_numeric()  {
-//                 temp_arr.push(j.to_digit(10).expect("is digit"));
-//             }
-//         }
-//         return temp_arr[0] * 10 + &temp_arr[temp_arr.len() - 1];
-//     }
-//     0
-// }
+pub fn run(input: &str) -> u32 {
+    let lines: _ = input.trim().lines();
+    let mut answer: u32 = 0;
+    let mut digits: Vec<u8> = vec![];
+    for line in lines {
+        for byte in line.bytes() {
+            // b'0' = ASCII 0
+            if byte - b'0' < 10 {
+                &digits.push(byte - b'0');
+            }
+        }
+        answer += (&digits[0] * 10 + &digits[&digits.len() - 1]) as u32;
+        digits.clear()
+    }
+    answer
+}

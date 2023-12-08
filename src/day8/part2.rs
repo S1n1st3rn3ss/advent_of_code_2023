@@ -1,121 +1,95 @@
-use std::cmp::Ordering;
+use std::ops::BitOr;
+use num_integer::{Integer, lcm};
 use hashbrown::HashMap;
-
-const CARD: [(char, u16); 13] = [
-    ('J', 1),
-    ('2', 2),
-    ('3', 3),
-    ('4', 4),
-    ('5', 5),
-    ('6', 6),
-    ('7', 7),
-    ('8', 8),
-    ('9', 9),
-    ('T', 10),
-    ('Q', 11),
-    ('K', 12),
-    ('A', 13),
-];
-#[derive(Debug, Eq, PartialEq, Default)]
-struct Player {
-    hand: Vec<u16>,
-    combo: u16,
-    bid: u16,
-}
-impl Ord for Player {
-    fn cmp(&self, other: &Self) -> Ordering {
-        if self.combo == other.combo {
-            return self.hand.cmp(&other.hand).reverse()
-        }
-        self.combo.cmp(&other.combo).reverse()
-    }
-}
-impl PartialOrd for Player {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other).reverse())
-    }
-}
-pub fn run(input: &str) -> i64 {
+pub fn run(input: &str) -> u64 {
     let mut input = parse(input);
-    input.sort();
-    let mut sum: i64 = 0;
-    for (idx, player) in input.iter().enumerate() {
-        let rank = idx + 1;
-        sum += (rank * player.bid as usize) as i64;
-    }
-    sum
-}
-fn parse(input: &str) -> Vec<Player> {
-    let card_hash: HashMap<char, u16> = HashMap::<char, u16>::from(CARD);
     input
+}
+#[derive(Debug, Clone)]
+struct Direction<'a> {
+    left: &'a str,
+    right: &'a str
+}
+fn parse(input: &str) -> u64 {
+    let lines: Vec<String> = input
         .trim()
         .lines()
-        .map(|x| x.split_once(" ").unwrap())
-        .map(|(cards, bid)| Player { hand: cards.chars().map(|x| card_hash.get(&x).unwrap().to_owned()).collect(), bid: bid.parse::<u16>().unwrap(), combo: 0})
-        .map(|x| set_hand_combo(x, &card_hash)).collect()
+        .map(|x| x.to_owned())
+        .collect();
+    // True = Right, False = Right
+    let inputs: Vec<bool> = lines[0].chars().map(|x| x == 'R').collect();
+    let path: Vec<_> = lines.iter().skip(2)
+        .map(|x| x.split_once('=').unwrap())
+        .map(|(start, end)| (start, end.split_once(", ").unwrap()))
+        .collect();
+    let path: Vec<(&str, (&str, &str))> = path.iter()
+        .map(|(start, (left, right))|
+            (start.trim(), (left.strip_prefix(" (").unwrap(), right.strip_suffix(")").unwrap())))
+        .collect();
+    let mut map: HashMap<&str, Direction> = Default::default();
+    for i in path {
+        let map_ref = &mut map;
+        map_ref.insert(i.0, Direction {left: i.1.0, right: i.1.1});
+    }
+    let out = iterate(inputs, &map);
+    out
 }
-fn set_hand_combo(input: Player, card_hash: &HashMap<char, u16>) -> Player {
-    let mut cards: HashMap<u16, u16> = HashMap::new();
-    let mut jokers: u16 = 0;
-    for i in input.hand.clone() {
-        cards.entry(i).and_modify(|e| *e += 1).or_insert(1);
-        if i == 1 {
-            jokers += 1;
+#[derive(Debug, Clone)]
+struct Node<'a> {
+    curr: &'a str,
+    count: i32,
+    dirs: &'a Direction<'a>,
+    locked: bool
+}
+fn iterate(inputs: Vec<bool>, map: &HashMap<&str, Direction>) -> u64 {
+    let mut map = map;
+    let mut steps: usize = 0;
+    let mut a_map: HashMap<&str, Node> = Default::default();
+    for (k, v) in map {
+        if k.as_bytes()[2] == b'A' {
+            let node = Node {
+                curr: k,
+                count: 1,
+                locked: false,
+                dirs: map.get(k).unwrap(),
+            };
+            a_map.insert(k, node);
         }
     }
-    let mut player: Player = Default::default();
-    let mut max_count: (u16, u16) = (0, 0);
-    let mut max: u16 = 0;
-    for (card, count) in cards.clone() {
-        if count > max_count.1 && card != 1 {
-            max_count = (card, count);
+    let mut all_locked = false;
+    while !all_locked {
+        let turn = inputs[steps % inputs.len()];
+        let cl = a_map.clone();
+        for (idx, node) in cl {
+            let dir = a_map.get(idx).unwrap().dirs;
+            let curr = if turn {dir.right} else {dir.left};
+            let lock = (&curr.chars().last().unwrap() == &'Z').bitor(node.locked);
+            a_map.entry(idx).and_modify(|node| *node = Node {
+                curr, count: node.count + if lock { 0 } else { 1 }, dirs: map.get(curr).unwrap(), locked: lock
+            });
         }
-        max = max.max(card);
+        steps += 1;
+        let mut locks = 0;
+        for i in &a_map {
+            if i.1.locked {
+                locks += 1;
+            }
+        }
+        all_locked = locks == a_map.len();
+        // all_locked = &a_map.iter().filter(|(s, x)| !x.locked).count() == &a_map.len();
     }
-    match max_count.1 {
-        1 => {
-            cards.entry(max).and_modify(|x| *x += jokers);
-            cards.entry(1).and_modify(|x| *x -= jokers)
-        },
-        _ => cards.entry(max_count.0).and_modify(| x| *x += jokers),
-    };
-    for (_, count) in &cards {
-        if cards.len() == 5 {
-            player.combo = 1;
-            break;
-        }
-        match count {
-            5 => {
-                player.combo = player.combo.max(7);
-                break;
-            },
-            4 => {
-                player.combo = player.combo.max(6);
-                break;
-            }
-            3 => {
-                if player.combo == 2 {
-                    player.combo= player.combo.max(5);
-                    break;
-                } else {
-                    player.combo = player.combo.max(4);
-                }
-            }
-            2 => {
-                match player.combo {
-                    2 => { player.combo = player.combo.max(3); break },
-                        4 => {
-                    player.combo = player.combo.max(5);
-                    break;
-                }
-                    _ => player.combo = player.combo.max(2)
-                }
-            }
-            1 => player.combo = player.combo.max(1),
-            _ => {}
-        }
+    dbg!(&a_map);
+    let mut lcm_vec: Vec<u64> = vec![];
+    for (idx, node) in a_map {
+        lcm_vec.push(node.count as u64)
     }
-    player.hand = input.hand;
-    player.bid = input.bid;
-    player
+    let answer = get_least_common_multiple(lcm_vec);
+    answer
+}
+fn get_least_common_multiple(numbers: Vec<u64>) -> u64 {
+    let mut first = numbers[0];
+    for i in 1..numbers.len() {
+        first = first.lcm(&numbers[i])
+    }
+    first
 }

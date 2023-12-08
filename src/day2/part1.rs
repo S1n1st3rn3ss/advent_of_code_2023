@@ -16,49 +16,49 @@ pub struct Game {
     min_group: Group,
     possible: bool
 }
-pub fn parse_game(input: Vec<String>) -> Vec<Game> {
-    // trim "Game n: " from each string
+pub fn run(input: &str) -> i32 {
+    let parsed: _ = input
+        .lines()
+        .map(|x|
+            x.split_once(':')
+                .unwrap()
+                .1.trim())
+        .map(|x|
+            x.split(';')
+                .map(|x| x.trim()).collect())
+        .collect::<Vec<Vec<&str>>>();
     let mut games: Vec<Game> = Default::default();
-    for (id, res) in input.clone().iter().enumerate()  {
+    for (id, res) in parsed.iter().enumerate()  {
         let mut game: Game = Game {
             id: (id + 1) as i32,
             group: vec![],
             min_group: Default::default(),
             possible: true,
         };
-        // println!("{:?}", game);
-        let trimmed: Vec<Vec<&str>> = res
-            .trim_start_matches("Game ")
-            .trim_start_matches(|c:char| c.is_digit(10) || c == ':')
-            .trim()
-            .split("; ")
-            .map(|c| c.split(", ")
-                .collect::<Vec<&str>>())
-            .collect();
-        for x in trimmed {
+        for x in res {
             let mut gr = Group {
                 red: 0,
                 green: 0,
                 blue: 0
             };
-            for y in x {
-                if y.ends_with(" red") {
-                    gr.red = y.trim_end_matches(" red").parse::<i32>().unwrap();
-                }
-                if y.ends_with(" green") {
-                    gr.green = y.trim_end_matches(" green").parse::<i32>().unwrap();
-                }
-                if y.ends_with(" blue") {
-                    gr.blue = y.trim_end_matches(" blue").parse::<i32>().unwrap();
-                }
+            dbg!(x);
+            if x.ends_with(" red") {
+                gr.red = x.trim_end_matches(" red").parse::<i32>().unwrap();
             }
-
+            if x.ends_with(" green") {
+                gr.green = x.trim_end_matches(" green").parse::<i32>().unwrap();
+            }
+            if x.ends_with(" blue") {
+                gr.blue = x.trim_end_matches(" blue").parse::<i32>().unwrap();
+            }
             game.group.push(gr);
         }
-        games.push(game);
+        // games.push(game);
     }
-    games
+    // check_possibility(games)
+    0
 }
+
 
 pub fn check_possibility(games: Vec<Game>) -> i32 {
     let mut group_sum: i32 = 0;

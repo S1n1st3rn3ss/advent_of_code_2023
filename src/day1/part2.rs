@@ -1,9 +1,8 @@
 pub fn run(input: &str) -> i32 {
-    let input: Vec<String> = input.lines().map(|x| x.to_string()).collect();
+    let input: _ = input.trim().lines();
     let mut sum: i32 = 0;
-
-    for i in &input {
-        let mut temp_arr: Vec<i32> = vec![];
+    let mut temp_arr: Vec<i32> = vec![];
+    for i in input {
         for c in 0..i.len() {
             let j = &i[c..];
             if j.starts_with('1') || j.starts_with("one") { temp_arr.push(1); }
@@ -17,6 +16,7 @@ pub fn run(input: &str) -> i32 {
             if j.starts_with('9') || j.starts_with("nine") { temp_arr.push(9); }
         }
         sum += temp_arr[0] * 10 + &temp_arr[temp_arr.len() - 1];
+        temp_arr.clear();
     }
     sum
 }
