@@ -34,23 +34,15 @@ fn iterate(inputs: Vec<bool>, first: String, map: HashMap<String, Node>) -> u64 
     let mut map = map;
     let mut steps: usize = 0;
     let mut curr: String = first.clone();
-    // dbg!(map.get(&first));
-    let mut i = 0;
     while curr != "ZZZ" {
-        steps += 1;
-        if i < steps {
-            i += 1;
-        }
-        if i == inputs.len() {
-            i = 0;
-        }
-        let turn = inputs[i];
-
+        let turn = inputs[steps % inputs.len()];
         if turn {
+            curr = (*map.get(&curr).unwrap().right).parse().unwrap();
         }
         else {
             curr = (*map.get(&curr).unwrap().left).parse().unwrap();
         }
+        steps += 1;
     }
-    0
+    steps as u64
 }
