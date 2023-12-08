@@ -1,6 +1,8 @@
 use std::cmp::max;
 use std::ops::Index;
 use regex::Regex;
+
+// TODO: Split into parts and bench
 #[derive(Default, Debug)]
 pub struct Group {
     red: i32,
@@ -31,7 +33,7 @@ pub fn parse_game(input: Vec<String>) -> Vec<Game> {
             .trim()
             .split("; ")
             .map(|c| c.split(", ")
-            .collect::<Vec<&str>>())
+                .collect::<Vec<&str>>())
             .collect();
         for x in trimmed {
             let mut gr = Group {

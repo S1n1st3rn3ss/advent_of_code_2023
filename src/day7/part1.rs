@@ -58,33 +58,55 @@ fn parse(input: &str) -> Vec<Player> {
 }
 fn set_hand_combo(input: Player, card_hash: &HashMap<char, u16>) -> Player {
     let mut cards: HashMap<u16, u16> = HashMap::new();
-    for i in input.hand.clone() {
-        cards.entry(i).and_modify(|e| *e += 1).or_insert(1);
+    for i in &input.hand{
+        cards.entry(*i).and_modify(|e| *e += 1).or_insert(1);
     }
     let mut player: Player = Default::default();
-    for (card, count) in cards {
+    for (card, count) in &cards {
+        if cards.len() == 5 {
+            player.combo = 1;
+            break;
+        }
         match count {
             5 => {
-                player.combo = player.combo.max(7);
+                player.combo = 7;
+                break;
             },
             4 => {
-                player.combo = player.combo.max(6);
+                player.combo = 6;
+                break;
             }
             3 => {
-                if player.combo == 2 {
-                    player.combo= player.combo.max(5)
-                } else {
-                    player.combo = player.combo.max(4)
+                match cards.len() {
+                    2 => {
+                        player.combo = 5;
+                        break;
+                    }
+                    3 => {
+                        player.combo = 4;
+                        break;
+                    }
+                    _ => {panic!("???")}
                 }
             }
             2 => {
-                match player.combo {
-                    4 => player.combo = player.combo.max(5),
-                    2 => player.combo = player.combo.max(3),
-                    _ => player.combo = player.combo.max(2)
+                match cards.len() {
+                    2 => {
+                        player.combo = 5;
+                        break;
+                    }
+                    3 => {
+                        player.combo = 3;
+                        break;
+                    }
+                    4 => {
+                        player.combo = 2;
+                        break;
+                    }
+                    _ => panic!("???")
                 }
             }
-            1 => player.combo = player.combo.max(1),
+            1 => player.combo = 11,
             _ => {}
         }
     }

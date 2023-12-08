@@ -6,6 +6,13 @@ struct Card {
     worth: i32,
     count: i32
 }
+// TODO: Split into parts and bench
+pub fn run(input: &str) -> u64 {
+    let i: Iterator<Item = (&str, &str)>  = input
+        .lines()
+        .map(|x| x.split_once(':').unwrap().1.trim())
+        .map(|x| x.split_once('|')).into_iter();
+}
 pub fn parse_cards(input: Vec<String>) {
     let mut sum: i32 = 0;
     let mut map: Vec<Card> = Default::default();
