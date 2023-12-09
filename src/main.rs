@@ -11,7 +11,9 @@ pub mod day2;
 use std::fs;
 use std::fs::File;
 use std::io::Read;
+use advent_of_code_2023::*;
+
 pub fn main() {
     let mut string: String = fs::read_to_string("input.txt").expect("");
-    println!("{}", day8::part2::run(&string));
+    println!("{}", day9::part2::run(&string));
 }
