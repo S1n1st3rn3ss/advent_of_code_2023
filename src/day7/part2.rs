@@ -41,6 +41,7 @@ pub fn run(input: &str) -> i64 {
     let mut sum: i64 = 0;
     for (idx, player) in input.iter().enumerate() {
         let rank = idx + 1;
+        println!("Rank: {rank}, combo: {},  hand: {:?}", player.combo, player.hand);
         sum += (rank * player.bid as usize) as i64;
     }
     sum
@@ -80,10 +81,6 @@ fn set_hand_combo(input: Player, card_hash: &HashMap<char, u16>) -> Player {
         _ => cards.entry(max_count.0).and_modify(| x| *x += jokers),
     };
     for (_, count) in &cards {
-        if cards.len() == 5 {
-            player.combo = 1;
-            break;
-        }
         match count {
             5 => {
                 player.combo = player.combo.max(7);
@@ -104,10 +101,10 @@ fn set_hand_combo(input: Player, card_hash: &HashMap<char, u16>) -> Player {
             2 => {
                 match player.combo {
                     2 => { player.combo = player.combo.max(3); break },
-                        4 => {
-                    player.combo = player.combo.max(5);
-                    break;
-                }
+                    4 => {
+                        player.combo = player.combo.max(5);
+                        break;
+                    }
                     _ => player.combo = player.combo.max(2)
                 }
             }
